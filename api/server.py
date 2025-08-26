@@ -6,12 +6,12 @@ from torchvision import transforms
 from PIL import Image
 import io
 
-# 1. INICIALIZAÇÃO DA API
+# Inicializando API
 app = FastAPI(title="API Classificadora de Cães e Gatos")
 
 # Configuração do CORS (Cross-Origin Resource Sharing)
 # Permite que o nosso front-end (em outra "origem") acesse esta API.
-origins = ["*"]  # Para desenvolvimento. Em produção, restrinja para o domínio do seu site.
+origins = ["*"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -20,27 +20,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 2. CARREGAMENTO DO MODELO
+# Carregamento do modelo
 # O modelo precisa ter a mesma arquitetura de quando foi treinado.
 model = models.resnet18()
 num_ftrs = model.fc.in_features
-model.fc = torch.nn.Linear(num_ftrs, 2)  # 2 classes: Gato e Cão
+model.fc = torch.nn.Linear(num_ftrs, 2)
 
 # Carregar os pesos salvos do modelo
-# Certifique-se que o arquivo .pth está na mesma pasta que este script.
 try:
     model.load_state_dict(torch.load("cat_dog_classifier_model.pth", map_location=torch.device('cpu')))
 except FileNotFoundError:
     print("Erro: Arquivo 'cat_dog_classifier_model.pth' não encontrado.")
-    print("Certifique-se de copiá-lo para a pasta 'api/'.")
     exit()
 
-model.eval()  # !! IMPORTANTE: Colocar o modelo em modo de avaliação
+model.eval()  # Colocar o modelo em modo de avaliação (Importante)
 
-# Nomes das classes (precisa ser na mesma ordem do treinamento, geralmente alfabética)
+# Nomes das classes
 class_names = ['cat', 'dog'] 
 
-# 3. TRANSFORMAÇÕES DA IMAGEM
+# Transformações da imagem
 # Devem ser as mesmas transformações usadas na VALIDAÇÃO durante o treinamento.
 transform = transforms.Compose([
     transforms.Resize(256),
@@ -49,7 +47,7 @@ transform = transforms.Compose([
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
 
-# 4. FUNÇÃO DE PREDIÇÃO
+# Função de predição
 def predict_image(image_bytes: bytes):
     """Função para receber bytes de uma imagem e retornar a previsão."""
     image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
@@ -66,7 +64,7 @@ def predict_image(image_bytes: bytes):
 
     return predicted_class, confidence_score
 
-# 5. DEFINIÇÃO DO ENDPOINT DA API
+# Definição do endpoint principal da API
 @app.post("/predict/")
 async def predict(file: UploadFile = File(...)):
     """
@@ -76,7 +74,6 @@ async def predict(file: UploadFile = File(...)):
     image_bytes = await file.read()
     predicted_class, confidence = predict_image(image_bytes)
 
-    # Traduzindo para português para o front-end
     if predicted_class == 'dog':
         classe_traduzida = "Cachorro"
     else:
@@ -84,9 +81,10 @@ async def predict(file: UploadFile = File(...)):
 
     return {
         "prediction": classe_traduzida,
-        "confidence": f"{confidence:.2%}" # Formata como porcentagem
+        "confidence": f"{confidence:.2%}"
     }
 
+# Apenas para teste
 @app.get("/test")
 def read_root():
     return {"message": "Bem-vindo à API de Classificação de Cães e Gatos!"}
