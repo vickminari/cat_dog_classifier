@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classificador de Cães e Gatos</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Classificador de Cães e Gatos</h1>
+        <p>Faça o upload de uma imagem e descubra se é um cão ou um gato!</p>
+        
+        <div class="classifier-box">
+            <div class="image-preview" id="imagePreview">
+                <img src="" alt="Pré-visualização da Imagem" class="image-preview__image">
+                <span class="image-preview__default-text">Pré-visualização da Imagem</span>
+            </div>
+            
+            <form id="uploadForm">
+                <input type="file" id="imageUpload" name="file" accept="image/*" required>
+                <label for="imageUpload" class="custom-file-upload">Escolher Imagem</label>
+                <button type="submit" class="button">Classificar!</button>
+            </form>
+
+            <div id="loader" class="loader" style="display: none;"></div>
+            
+            <div id="result" class="result-box"></div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
